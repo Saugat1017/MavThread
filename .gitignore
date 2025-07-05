@@ -1,0 +1,72 @@
+# Root-level .gitignore
+# ==========================
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node modules (frontend)
+**/node_modules/
+
+# Dependency directories (e.g., IntelliJ, Eclipse)
+**/.idea/
+**/.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# =======================================
+# Frontend: Vite + React
+# (Assuming in /frontend folder)
+# =======================================
+
+# Build output
+/frontend/dist/
+/frontend/.vite/
+
+# Local env files
+/frontend/.env*
+!.env.example
+
+# =======================================
+# Backend: Java + Spring Boot
+# (Assuming in /backend folder)
+# =======================================
+
+# Build directories
+/backend/target/
+/backend/bin/
+/backend/out/
+
+# IDEs and tooling
+/backend/.classpath
+/backend/.project
+/backend/.settings/
+
+# Maven/Gradle wrappers
+/backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+/backend/gradle/
+backend/gradlew
+backend/gradlew.bat
+
+# Local env files
+/backend/.env*
+backend/application-local.properties
+
+# IntelliJ
+/backend/*.iml
+
+# Logs
+/backend/logs/
+backend/*.log
+
+# Spring Boot devtools
+/backend/.restart
+/backend/.reload
+/backend/.cache
+
