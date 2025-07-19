@@ -27,6 +27,7 @@
 /Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/Service/DashboardService.java
 /Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/Repository/PostRepository.java
 /Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/Service/AuthService.java
+/Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/config/WebConfig.java
 /Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/Entity/Subscribe.java
 /Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/dto/UserSettingsResponse.java
 /Users/anmolpandey/Desktop/MavThread/backend/src/main/java/com/MyProject/MavHelp/Controller/ReportController.java

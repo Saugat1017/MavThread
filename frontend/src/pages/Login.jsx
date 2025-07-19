@@ -6,9 +6,40 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
+  const handleLoginSubmit = async () => {
+    const data = {
+      email,
+      password,
+    }
+
+    try {
+      const res = await fetch('http://localhost:8082/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        alert(err.message || 'Log in failed')
+        return
+      }
+
+      const result = await res.json()
+      console.log('Login success:', result)
+      alert('Login successful!')
+      navigate('/dashboard') // Redirect to dashboard or home after login
+    } catch (error) {
+      console.error('LOGIN ERROR:', error)
+      alert('An error occurred during login.')
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    
+    handleLoginSubmit()
   }
 
   return (
@@ -46,7 +77,7 @@ export default function Login() {
           Login
         </button>
 
-                <div className="text-center">
+        <div className="text-center">
           <button
             type="button"
             className="text-sm text-lime-300 hover:underline transition"
