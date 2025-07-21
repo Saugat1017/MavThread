@@ -30,7 +30,7 @@ export default function Login() {
       const result = await res.json()
       console.log('Login success:', result)
       alert('Login successful!')
-      navigate('/dashboard') // Redirect to dashboard or home after login
+      navigate('/threads') // Redirect to threads after login
     } catch (error) {
       console.error('LOGIN ERROR:', error)
       alert('An error occurred during login.')
