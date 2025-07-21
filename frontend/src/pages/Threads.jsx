@@ -70,7 +70,7 @@ export default function ThreadsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100 flex flex-col">
       <div className="container mx-auto px-4 py-6 flex-1 space-y-6">
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-4 pt-8">

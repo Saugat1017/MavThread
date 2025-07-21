@@ -6,6 +6,7 @@ import HomePage from './pages/Home'
 import Signup from './pages/SignUp'
 import Login from './pages/Login'
 import Threads from './pages/Threads'
+import WeeklyLeaderboardPage from './pages/WeeklyLeaderBoardPage'
 
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/threads" element={<Threads />} />
+        <Route path="/leaderboard" element={<WeeklyLeaderboardPage />} />
         
       </Route>
     </Routes>
