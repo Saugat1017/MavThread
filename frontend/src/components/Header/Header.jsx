@@ -12,11 +12,15 @@ export default function Header() {
     navigate("/signup")
   }
 
+  const handleLogoClick = () => {
+    navigate("/")
+  }
+
   return (
     <header className="fixed top-0 left-0 w-full backdrop-blur-md bg-white/10 z-50 p-3">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <h1 className="text-2xl font-extrabold tracking-wide">
+        <h1 className="text-2xl font-extrabold tracking-wide cursor-pointer" onClick={handleLogoClick}>
           <span className="text-white">MAV</span>
           <span className="bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">THREAD</span>
         </h1>
