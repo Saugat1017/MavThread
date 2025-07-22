@@ -24,12 +24,10 @@ public class PostController {
     public ResponseEntity<String> createPost(@RequestBody PostRequest request) {
         return ResponseEntity.ok(postService.createPost(request));
     }
-
     @PostMapping("/{postId}/reply")
     public ResponseEntity<String> replyToPost(@PathVariable Long postId, @RequestBody ReplyRequest request) {
         return ResponseEntity.ok(postService.replyToPost(postId, request.getContent()));
     }
-
     @GetMapping("/group")
     public ResponseEntity<List<PostResponse>> getGroupPosts() {
         return ResponseEntity.ok(postService.getGroupPosts());
@@ -45,6 +43,12 @@ public class PostController {
     @GetMapping("/my-history")
     public ResponseEntity<List<PostResponse>> getMyHistory() {
         return ResponseEntity.ok(postService.getMyRecentPosts());
+    }
+    @GetMapping
+    public ResponseEntity<List<PostResponse>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(postService.getPaginatedThreadFeed(page, size));
     }
 
 

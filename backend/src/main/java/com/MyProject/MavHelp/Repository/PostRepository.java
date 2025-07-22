@@ -37,6 +37,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     ORDER BY p.createdAt DESC
 """)
     List<Post> findAllTopLevelPostsByStudentSorted(String studentId);
+    @Query("""
+    SELECT p FROM Post p
+    WHERE p.student.groupCode = :groupCode AND p.parent IS NULL
+    ORDER BY p.createdAt DESC
+""")
+    List<Post> findByStudent_GroupCodeAndParentIsNull(String groupCode, Pageable pageable);
+
 
 
 }

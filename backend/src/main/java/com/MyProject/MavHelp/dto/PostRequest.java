@@ -6,4 +6,5 @@ import lombok.Data;
 public class PostRequest {
     private String content;
     private String imageUrl; // optional
+    private String videoUrl;
 }

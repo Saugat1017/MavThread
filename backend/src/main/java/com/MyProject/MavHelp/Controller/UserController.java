@@ -35,7 +35,6 @@ public class UserController {
     public ResponseEntity<String> updateSettings(@RequestBody UserSettingsRequest request) {
         return ResponseEntity.ok(userService.updateSettings(request));
     }
-
     @GetMapping("/settings")
     public ResponseEntity<UserSettingsResponse> getSettings() {
         return ResponseEntity.ok(userService.getSettings());

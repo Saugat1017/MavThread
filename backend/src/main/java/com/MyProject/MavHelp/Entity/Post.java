@@ -22,6 +22,7 @@ public class Post {
     private String content;
 
     private String imageUrl;
+    private String videoUrl;
 
     private boolean anonymous;
 

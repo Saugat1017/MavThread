@@ -11,6 +11,7 @@ public class PostResponse {
     private Long id;
     private String content;
     private String imageUrl;
+    private String videoUrl;
     private boolean anonymous;
     private String authorName;
     private LocalDateTime createdAt;

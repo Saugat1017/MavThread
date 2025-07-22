@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +30,16 @@ public class ReportService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         Report report = Report.builder()
-                .post(post)
                 .reporter(reporter)
+                .post(post)
                 .reason(reason)
                 .reportedAt(LocalDateTime.now())
                 .build();
 
         reportRepository.save(report);
+    }
+
+    public List<Report> getAllReports() {
+        return reportRepository.findAllByOrderByCreatedAtDesc();
     }
 }

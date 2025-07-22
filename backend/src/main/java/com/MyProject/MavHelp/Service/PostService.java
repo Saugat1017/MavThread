@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -29,6 +31,7 @@ public class PostService {
         Post post = Post.builder()
                 .content(request.getContent())
                 .imageUrl(request.getImageUrl())
+                .videoUrl(request.getVideoUrl())
                 .student(student)
                 .anonymous(isAnonymous)
                 .createdAt(LocalDateTime.now())
@@ -158,4 +161,47 @@ public class PostService {
             postRepository.deleteAll(toDelete);
         }
     }
+
+
+    private PostResponse buildThreadPostResponse(Post post) {
+        boolean isTopRanked = postRepository
+                .findTop3ByGroupCode(post.getStudent().getGroupCode(), PageRequest.of(0, 3))
+                .contains(post);
+
+        String author = post.isAnonymous() && !isTopRanked
+                ? "Anonymous"
+                : post.getStudent().getName();
+
+        return PostResponse.builder()
+                .id(post.getId())
+                .content(post.getContent())
+                .imageUrl(post.getImageUrl())
+                .anonymous(post.isAnonymous())
+                .authorName(author)
+                .createdAt(post.getCreatedAt())
+                .upvotes(post.getUpvotes())
+                .downvotes(post.getDownvotes())
+                .appreciations(post.getAppreciations())
+                .totalPoints(post.getTotalPoints())
+                .replies(post.getReplies().stream()
+                        .sorted(Comparator.comparing(Post::getCreatedAt))
+                        .map(this::buildThreadPostResponse)
+                        .toList())
+                .build();
+    }
+    public List<PostResponse> getPaginatedThreadFeed(int page, int size) {
+        Student currentStudent = getCurrentStudent();
+        String groupCode = currentStudent.getGroupCode();
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        List<Post> topLevelPosts = postRepository
+                .findByStudent_GroupCodeAndParentIsNull(groupCode, pageRequest);
+
+        return topLevelPosts.stream()
+                .map(this::buildThreadPostResponse)
+                .toList();
+    }
+
+
 }
