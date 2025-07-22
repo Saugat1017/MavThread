@@ -33,7 +33,7 @@ public class ReportService {
                 .reporter(reporter)
                 .post(post)
                 .reason(reason)
-                .reportedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         reportRepository.save(report);

@@ -28,5 +28,5 @@ public class Report {
     @Column(nullable = false)
     private String reason;
 
-    private LocalDateTime reportedAt;
+    private LocalDateTime createdAt;
 }
