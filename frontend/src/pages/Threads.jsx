@@ -9,6 +9,8 @@ import {
   ThumbDownIcon,
   ChatAltIcon,
   UserCircleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from '@heroicons/react/outline'
 
 const mockThreads = [
@@ -20,18 +22,32 @@ const mockThreads = [
     upvotes: 10,
     downvotes: 2,
     appreciations: 3,
-    comments: [],
+    comments: [
+      {
+        id: 11,
+        author: 'Alice',
+        content: 'That’s awesome, keep it up!',
+        timestamp: '2025-07-20T19:00:00Z',
+      },
+      {
+        id: 12,
+        author: 'Bob',
+        content: 'Can’t wait to try it.',
+        timestamp: '2025-07-20T19:15:00Z',
+      },
+    ],
   },
-  // …
+  // …more threads
 ]
 
 export default function ThreadsPage() {
   const [threads, setThreads] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [replyTo, setReplyTo] = useState(null)
+  const [expanded, setExpanded] = useState([])
 
   useEffect(() => {
-    // TODO: replace with real fetch
+    // TODO: fetch from API
     setThreads(mockThreads)
   }, [])
 
@@ -50,24 +66,30 @@ export default function ThreadsPage() {
 
   const handleReply = (threadId, text) => {
     setThreads((prev) =>
-      prev.map((thread) => {
-        if (thread.id === threadId) {
-          const newComment = {
-            id: Date.now(),
-            author: 'You',
-            content: text,
-            timestamp: new Date().toISOString(),
-          }
-          return {
-            ...thread,
-            comments: [...(thread.comments || []), newComment],
-          }
-        }
-        return thread
-      })
+      prev.map((t) =>
+        t.id === threadId
+          ? {
+              ...t,
+              comments: [
+                ...t.comments,
+                {
+                  id: Date.now(),
+                  author: 'You',
+                  content: text,
+                  timestamp: new Date().toISOString(),
+                },
+              ],
+            }
+          : t
+      )
     )
     setReplyTo(null)
   }
+
+  const toggleComments = (id) =>
+    setExpanded((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100 flex flex-col">
@@ -77,7 +99,7 @@ export default function ThreadsPage() {
           <h1 className="text-2xl font-bold">Threads</h1>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full text-white font-semibold hover:scale-105 transform transition"
+            className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full text-white font-semibold hover:scale-105 transition"
           >
             <span className="text-xl">+</span>
             <span>Create Thread</span>
@@ -88,57 +110,73 @@ export default function ThreadsPage() {
         {threads.map((t) => (
           <div
             key={t.id}
-            className="relative bg-gray-850 bg-opacity-60 backdrop-blur-sm p-6 rounded-2xl shadow-lg"
+            className="relative bg-gray-850 bg-opacity-60 backdrop-blur-sm p-6 rounded-2xl shadow-lg border-l-4 border-indigo-500 hover:shadow-xl transition"
           >
+            {/* Main Thread */}
             <div className="flex items-center space-x-3 mb-4">
               <UserCircleIcon className="h-10 w-10 text-orange-400" />
               <div>
-                <p className="font-semibold">{t.author}</p>
+                <p className="font-semibold text-white">{t.author}</p>
                 <p className="text-xs text-gray-400">
                   {new Date(t.timestamp).toLocaleString()}
                 </p>
               </div>
             </div>
+            <p className="mb-5 text-gray-100">{t.content}</p>
 
-            <p className="mb-5">{t.content}</p>
-
-            <div className="flex justify-between">
-              <button className="flex items-center space-x-1 px-3 py-2 rounded-full hover:bg-gray-700 transition">
+            {/* Actions */}
+            <div className="flex space-x-4 text-sm text-gray-300">
+              <button className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition">
                 <ThumbUpIcon className="h-5 w-5 text-green-400" />
-                <span className="text-sm">{t.upvotes}</span>
+                <span>{t.upvotes}</span>
               </button>
-              <button className="flex items-center space-x-1 px-3 py-2 rounded-full hover:bg-gray-700 transition">
+              <button className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition">
                 <HeartIcon className="h-5 w-5 text-pink-400" />
-                <span className="text-sm">{t.appreciations}</span>
+                <span>{t.appreciations}</span>
               </button>
-              <button className="flex items-center space-x-1 px-3 py-2 rounded-full hover:bg-gray-700 transition">
+              <button className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition">
                 <ThumbDownIcon className="h-5 w-5 text-red-400" />
-                <span className="text-sm">{t.downvotes}</span>
+                <span>{t.downvotes}</span>
               </button>
               <button
                 onClick={() => setReplyTo(t)}
-                className="flex items-center space-x-1 px-3 py-2 rounded-full hover:bg-gray-700 transition"
+                className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition"
               >
                 <ChatAltIcon className="h-5 w-5 text-blue-400" />
-                <span className="text-sm">Reply</span>
+                <span>Reply</span>
               </button>
             </div>
 
-            {/* Comments */}
-            {t.comments?.length > 0 && (
+            {/* Toggle Comments */}
+            <button
+              onClick={() => toggleComments(t.id)}
+              className="mt-4 flex items-center text-sm text-gray-400 hover:text-gray-200 transition"
+            >
+              {expanded.includes(t.id) ? (
+                <ChevronUpIcon className="h-4 w-4" />
+              ) : (
+                <ChevronDownIcon className="h-4 w-4" />
+              )}
+              <span className="ml-1">{t.comments.length} Comments</span>
+            </button>
+
+            {/* Threaded Comments */}
+            {expanded.includes(t.id) && t.comments.length > 0 && (
               <div className="mt-4 space-y-3">
                 {t.comments.map((c) => (
                   <div
                     key={c.id}
-                    className="ml-12 bg-gray-800 bg-opacity-60 backdrop-blur-sm p-4 rounded-lg"
+                    className="ml-10 pl-4 border-l-2 border-emerald-500 bg-gray-800 bg-opacity-50 rounded-lg p-3"
                   >
-                    <p className="text-sm">
-                      <span className="font-semibold">{c.author}</span>{' '}
-                      <span className="text-gray-400">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-gray-100">
+                        {c.author}
+                      </span>
+                      <span className="text-xs text-gray-500">
                         {new Date(c.timestamp).toLocaleString()}
                       </span>
-                    </p>
-                    <p className="mt-1">{c.content}</p>
+                    </div>
+                    <p className="text-gray-200">{c.content}</p>
                   </div>
                 ))}
               </div>
@@ -151,19 +189,12 @@ export default function ThreadsPage() {
 
       {/* Create Thread Modal */}
       {showModal && (
-        <CreateThread
-          onClose={() => setShowModal(false)}
-          onCreate={handleCreate}
-        />
+        <CreateThread onClose={() => setShowModal(false)} onCreate={handleCreate} />
       )}
 
       {/* Reply Modal */}
       {replyTo && (
-        <ReplyModal
-          thread={replyTo}
-          onClose={() => setReplyTo(null)}
-          onReply={handleReply}
-        />
+        <ReplyModal thread={replyTo} onClose={() => setReplyTo(null)} onReply={handleReply} />
       )}
     </div>
   )
