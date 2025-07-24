@@ -32,10 +32,12 @@ public class PostController {
     public ResponseEntity<List<PostResponse>> getGroupPosts() {
         return ResponseEntity.ok(postService.getGroupPosts());
     }
+
     @GetMapping("/leaderboard")
     public ResponseEntity<List<Post>> getTopPosts() {
         return ResponseEntity.ok(postService.getTop3Posts());
     }
+
     @DeleteMapping("/{postId}/delete")
     public ResponseEntity<String> deletePost(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.deletePost(postId));
