@@ -26,6 +26,7 @@ public class PostController {
     }
     @PostMapping("/{postId}/reply")
     public ResponseEntity<String> replyToPost(@PathVariable Long postId, @RequestBody ReplyRequest request) {
+
         return ResponseEntity.ok(postService.replyToPost(postId, request.getContent()));
     }
     @GetMapping("/group")

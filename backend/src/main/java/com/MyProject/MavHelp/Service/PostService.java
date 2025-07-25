@@ -196,12 +196,13 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         List<Post> topLevelPosts = postRepository
-                .findByStudent_GroupCodeAndParentIsNull(groupCode, pageRequest);
+                .findTopLevelPostsWithReplies(groupCode, pageRequest);
 
         return topLevelPosts.stream()
                 .map(this::buildThreadPostResponse)
                 .toList();
     }
+
 
 
 }

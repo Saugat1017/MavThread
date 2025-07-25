@@ -18,7 +18,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findTop3ByScore(Pageable pageable);
 
     @Query("""
-        SELECT p FROM Post p 
+        SELECT p FROM Post p    
         WHERE p.student.groupCode = :groupCode AND p.parent IS NULL
         ORDER BY (p.upvotes * 2 + p.appreciations * 3 - p.downvotes) DESC
     """)
@@ -43,6 +43,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     ORDER BY p.createdAt DESC
 """)
     List<Post> findByStudent_GroupCodeAndParentIsNull(String groupCode, Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT p FROM Post p
+    LEFT JOIN FETCH p.replies
+    WHERE p.student.groupCode = :groupCode AND p.parent IS NULL
+    ORDER BY p.createdAt DESC
+""")
+    List<Post> findTopLevelPostsWithReplies(String groupCode, Pageable pageable);
+
 
 
 
