@@ -47,7 +47,7 @@ public class AuthService {
         studentRepository.save(student);
 
         String token = jwtTokenProvider.generateToken(student.getEmail());
-        return new AuthResponse(token, "Signup successful");
+        return new AuthResponse("Signup successful");
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -55,8 +55,11 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        String token = jwtTokenProvider.generateToken(request.getEmail());
-        return new AuthResponse(token, "Login successful");
+        Student student = studentRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String token = jwtTokenProvider.generateToken(student.getEmail());
+        return new AuthResponse("Login successful");
     }
 
     public void sendResetLink(String email) {
@@ -66,16 +69,16 @@ public class AuthService {
         String token = UUID.randomUUID().toString();
         LocalDateTime expiry = LocalDateTime.now().plusHours(1);
 
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setStudent(student);
-        resetToken.setExpiryDate(expiry);
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .student(student)
+                .expiryDate(expiry)
+                .build();
 
         passwordResetTokenRepository.save(resetToken);
 
         String resetUrl = "https://your-frontend.com/reset-password?token=" + token;
         System.out.println("RESET LINK: " + resetUrl);
-
     }
 
     public String resetPassword(String token, String newPassword) {

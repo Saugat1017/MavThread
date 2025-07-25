@@ -26,35 +26,49 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        String token = null;
+
+        // Step 1: Check Authorization header
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         System.out.println("[DEBUG_LOG] Authorization header: " + header);
-
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            System.out.println("[DEBUG_LOG] Extracted token: " + token);
+            token = header.substring(7);
+            System.out.println("[DEBUG_LOG] Extracted token from header: " + token);
+        }
 
-            boolean isValid = jwtTokenProvider.validateToken(token);
-            System.out.println("[DEBUG_LOG] Token valid: " + isValid);
-
-            if (isValid) {
-                String email = jwtTokenProvider.getEmailFromToken(token);
-                System.out.println("[DEBUG_LOG] Email from token: " + email);
-
-                var userDetails = userDetailsService.loadUserByUsername(email);
-                System.out.println("[DEBUG_LOG] UserDetails username: " + userDetails.getUsername());
-
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("[DEBUG_LOG] Authentication set in SecurityContextHolder");
+        // Step 2: If no header token, check cookies
+        if (token == null && request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    System.out.println("[DEBUG_LOG] Extracted token from cookie: " + token);
+                    break;
+                }
             }
+        }
+
+        // Step 3: Validate and authenticate
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            String email = jwtTokenProvider.getEmailFromToken(token);
+            System.out.println("[DEBUG_LOG] Email from token: " + email);
+
+            var userDetails = userDetailsService.loadUserByUsername(email);
+            System.out.println("[DEBUG_LOG] UserDetails username: " + userDetails.getUsername());
+
+            var authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
+
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            System.out.println("[DEBUG_LOG] Authentication set in SecurityContextHolder");
+        } else if (token == null) {
+            System.out.println("[DEBUG_LOG] No token found in header or cookie");
         } else {
-            System.out.println("[DEBUG_LOG] No valid Authorization header found");
+            System.out.println("[DEBUG_LOG] Token found but invalid");
         }
 
         filterChain.doFilter(request, response);
     }
+
 }

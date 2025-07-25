@@ -1,13 +1,15 @@
 package com.MyProject.MavHelp.Controller;
 
 import com.MyProject.MavHelp.Service.AuthService;
-import com.MyProject.MavHelp.dto.AuthResponse;
+import com.MyProject.MavHelp.Security.JwtTokenProvider;
 import com.MyProject.MavHelp.dto.LoginRequest;
 import com.MyProject.MavHelp.dto.ResetPasswordRequest;
 import com.MyProject.MavHelp.dto.SignUpRequest;
-import jakarta.servlet.http.Cookie;
+import com.MyProject.MavHelp.dto.AuthResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,27 +21,34 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    private void setAuthCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60); // 1 hour
-        response.addCookie(cookie);
+    private void setHttpOnlyCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(false) // Set to true in production (https)
+                .path("/")
+                .maxAge(60 * 60) // 1 hour
+                .sameSite("Lax") // or "Strict" or "None" depending on frontend setup
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignUpRequest request, HttpServletResponse response) {
-        AuthResponse authResponse = authService.signup(request);
-        setAuthCookie(response, authResponse.getToken());
-        return ResponseEntity.ok("Signup successful");
+    public ResponseEntity<AuthResponse> signup(@RequestBody SignUpRequest request, HttpServletResponse response) {
+        authService.signup(request);
+        String token = jwtTokenProvider.generateToken(request.getEmail());
+        setHttpOnlyCookie(response, token);
+        return ResponseEntity.ok(new AuthResponse("Signup successful"));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request, HttpServletResponse response) {
-        AuthResponse authResponse = authService.login(request);
-        setAuthCookie(response, authResponse.getToken());
-        return ResponseEntity.ok("Login successful");
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        authService.login(request);
+        String token = jwtTokenProvider.generateToken(request.getEmail());
+        setHttpOnlyCookie(response, token);
+        return ResponseEntity.ok(new AuthResponse("Login successful"));
     }
 
     @PostMapping("/forgot-password")
