@@ -1,5 +1,6 @@
 // src/components/Threads/ThreadCard.jsx
 import React from 'react'
+import { parseIsoDateWithMicro } from '../../utils/parseIsoDate'
 import {
   ThumbUpIcon,
   HeartIcon,
@@ -9,6 +10,7 @@ import {
 } from '@heroicons/react/outline'
 
 export default function ThreadCard({ thread }) {
+  const date = parseIsoDateWithMicro(thread.timestamp || thread.createdAt)
   const upvotes = thread.upvotes ?? thread.likes ?? 0
   const appreciations = thread.appreciations ?? 0
   const downvotes = thread.downvotes ?? 0
@@ -24,7 +26,8 @@ export default function ThreadCard({ thread }) {
         <div>
           <p className="text-white font-semibold">{thread.author}</p>
           <p className="text-gray-400 text-xs">
-            {new Date(thread.timestamp).toLocaleString()}
+             {date.toLocaleString()}
+             {console.log("Date:", date)}
           </p>
         </div>
       </div>

@@ -1,36 +1,44 @@
+// src/pages/Login.jsx
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { getProfile } from '../services/api'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
+  const { setUser } = useAuth()
 
   const handleLoginSubmit = async () => {
-    const data = {
-      email,
-      password,
-    }
-
     try {
       const res = await fetch('http://localhost:8082/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
       })
 
+      // read raw text, then try JSON-parse
+      const text = await res.text()
+      let result
+      try {
+        result = JSON.parse(text)
+      } catch {
+        result = { message: text }
+      }
+
       if (!res.ok) {
-        const err = await res.json()
-        alert(err.message || 'Log in failed')
+        alert(result.message || 'Login failed')
         return
       }
 
-      const result = await res.json()
-      console.log('Login success:', result)
-      alert('Login successful!')
-      navigate('/threads') // Redirect to threads after login
+      // load the authenticated user's profile
+      const profile = await getProfile()
+      setUser(profile)
+
+      // navigate to protected area
+      navigate('/threads')
     } catch (error) {
       console.error('LOGIN ERROR:', error)
       alert('An error occurred during login.')

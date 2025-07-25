@@ -18,7 +18,7 @@ export default function Footer() {
   const navigate = useNavigate()
 
   const handleHomeClick = () => {
-    navigate("/")
+    navigate("/threads")
   }
 
   const handleLeaderBoardClick = () => {

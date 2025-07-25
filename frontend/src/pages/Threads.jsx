@@ -12,83 +12,96 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from '@heroicons/react/outline'
-
-const mockThreads = [
-  {
-    id: 1,
-    author: 'Anmol Pandey',
-    content: 'Started working on a new thread app today!',
-    timestamp: '2025-07-20T18:35:00Z',
-    upvotes: 10,
-    downvotes: 2,
-    appreciations: 3,
-    comments: [
-      {
-        id: 11,
-        author: 'Alice',
-        content: 'That’s awesome, keep it up!',
-        timestamp: '2025-07-20T19:00:00Z',
-      },
-      {
-        id: 12,
-        author: 'Bob',
-        content: 'Can’t wait to try it.',
-        timestamp: '2025-07-20T19:15:00Z',
-      },
-    ],
-  },
-  // …more threads
-]
+import {
+  getGroupPosts,
+  createPost,
+  replyPost,
+  votePost,
+} from '../services/api'
 
 export default function ThreadsPage() {
+
   const [threads, setThreads] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [replyTo, setReplyTo] = useState(null)
   const [expanded, setExpanded] = useState([])
 
+  // fetch threads on mount
   useEffect(() => {
-    // TODO: fetch from API
-    setThreads(mockThreads)
+    fetchThreads()
+    console.log("Called fetchThread")
   }, [])
 
-  const handleCreate = (newThread) => {
-    const threadWithMeta = {
-      id: Date.now(),
-      author: 'You',
-      upvotes: 0,
-      downvotes: 0,
-      appreciations: 0,
-      comments: [],
-      ...newThread,
+  async function fetchThreads() {
+    try {
+      const data = await getGroupPosts()
+      console.log("Post Data: ", data) // DEBUG
+      console.log("Called fetchThread")
+      setThreads(data)
+    } catch (err) {
+      console.error('Failed to load posts:', err)
     }
-    setThreads((prev) => [threadWithMeta, ...prev])
   }
 
-  const handleReply = (threadId, text) => {
-    setThreads((prev) =>
-      prev.map((t) =>
-        t.id === threadId
-          ? {
-              ...t,
-              comments: [
-                ...t.comments,
-                {
-                  id: Date.now(),
-                  author: 'You',
-                  content: text,
-                  timestamp: new Date().toISOString(),
-                },
-              ],
-            }
-          : t
+  // create new top‐level post
+  async function handleCreate({ content }) {
+    try {
+      const newThread = await createPost(content)
+      setThreads(prev => [{ ...newThread, comments: [] }, ...prev])
+    } catch (err) {
+      console.error('Failed to create post:', err)
+    } finally {
+      setShowModal(false)
+    }
+  }
+
+  // reply to a post
+  async function handleReply(post, text) {
+    try {
+      const comment = await replyPost(post.id, text)
+      setThreads(prev =>
+        prev.map(t =>
+          t.id === post.id
+            ? { ...t, comments: [...(t.comments || []), comment] }
+            : t
+        )
       )
-    )
-    setReplyTo(null)
+    } catch (err) {
+      console.error('Failed to reply:', err)
+    } finally {
+      setReplyTo(null)
+    }
+  }
+
+  // cast a vote (upvote/ appreciation / downvote)
+  async function handleVote(postId, type) {
+    try {
+      await votePost(postId, type)
+      // optionally refetch or update counts:
+      setThreads(prev =>
+        prev.map(t =>
+          t.id === postId
+            ? {
+              ...t,
+              [type === 'upvote' ? 'upvotes'
+                : type === 'downvote' ? 'downvotes'
+                  : 'appreciations'
+              ]: t[type === 'upvote' ? 'upvotes'
+                : type === 'downvote' ? 'downvotes'
+                  : 'appreciations'
+              ] + 1
+            }
+            : t
+        )
+      )
+    } catch (err) {
+      console.error('Failed to vote:', err)
+    }
   }
 
   const toggleComments = (id) =>
-    setExpanded((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    setExpanded(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     )
 
   return (
@@ -107,7 +120,7 @@ export default function ThreadsPage() {
         </div>
 
         {/* Thread List */}
-        {threads.map((t) => (
+        {threads.map(t => (
           <div
             key={t.id}
             className="relative bg-gray-850 bg-opacity-60 backdrop-blur-sm p-6 rounded-2xl shadow-lg border-l-4 border-indigo-500 hover:shadow-xl transition"
@@ -118,7 +131,7 @@ export default function ThreadsPage() {
               <div>
                 <p className="font-semibold text-white">{t.author}</p>
                 <p className="text-xs text-gray-400">
-                  {new Date(t.timestamp).toLocaleString()}
+                  {new Date(t.createdAt).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -126,15 +139,24 @@ export default function ThreadsPage() {
 
             {/* Actions */}
             <div className="flex space-x-4 text-sm text-gray-300">
-              <button className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition">
+              <button
+                onClick={() => handleVote(t.id, 'upvote')}
+                className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition"
+              >
                 <ThumbUpIcon className="h-5 w-5 text-green-400" />
                 <span>{t.upvotes}</span>
               </button>
-              <button className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition">
+              <button
+                onClick={() => handleVote(t.id, 'appreciation')}
+                className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition"
+              >
                 <HeartIcon className="h-5 w-5 text-pink-400" />
                 <span>{t.appreciations}</span>
               </button>
-              <button className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition">
+              <button
+                onClick={() => handleVote(t.id, 'downvote')}
+                className="flex items-center space-x-1 px-3 py-1 bg-gray-800 rounded-full hover:bg-gray-700 transition"
+              >
                 <ThumbDownIcon className="h-5 w-5 text-red-400" />
                 <span>{t.downvotes}</span>
               </button>
@@ -157,26 +179,21 @@ export default function ThreadsPage() {
               ) : (
                 <ChevronDownIcon className="h-4 w-4" />
               )}
-              <span className="ml-1">{t.comments.length} Comments</span>
+              <span className="ml-1">{t.comments?.length || 0} Comments</span>
             </button>
 
-            {/* Threaded Comments */}
-            {expanded.includes(t.id) && t.comments.length > 0 && (
+            {/* comments */}
+            {expanded.includes(t.id) && t.comments?.length > 0 && (
               <div className="mt-4 space-y-3">
-                {t.comments.map((c) => (
-                  <div
-                    key={c.id}
-                    className="ml-10 pl-4 border-l-2 border-emerald-500 bg-gray-800 bg-opacity-50 rounded-lg p-3"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-gray-100">
-                        {c.author}
-                      </span>
-                      <span className="text-xs text-gray-500">
+                {t.comments.map(c => (
+                  <div key={c.id} className="ml-10 pl-4 border-l-2 border-emerald-500 …">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-semibold">{c.author}</span>
+                      <span className="text-gray-500">
                         {new Date(c.timestamp).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-gray-200">{c.content}</p>
+                    <p>{c.content}</p>
                   </div>
                 ))}
               </div>
@@ -189,12 +206,19 @@ export default function ThreadsPage() {
 
       {/* Create Thread Modal */}
       {showModal && (
-        <CreateThread onClose={() => setShowModal(false)} onCreate={handleCreate} />
+        <CreateThread
+          onClose={() => setShowModal(false)}
+          onCreate={handleCreate}
+        />
       )}
 
       {/* Reply Modal */}
       {replyTo && (
-        <ReplyModal thread={replyTo} onClose={() => setReplyTo(null)} onReply={handleReply} />
+        <ReplyModal
+          thread={replyTo}
+          onClose={() => setReplyTo(null)}
+          onReply={text => handleReply(replyTo, text)}
+        />
       )}
     </div>
   )
