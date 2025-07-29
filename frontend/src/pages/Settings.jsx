@@ -9,14 +9,22 @@ import {
   MoonIcon,
   SunIcon,
   LockClosedIcon,
+  CheckIcon,
+  XIcon,
 } from '@heroicons/react/outline'
+import { getProfile, updateProfile, getSettings, updateSettings } from '../services/api'
 
 export default function SettingsPage() {
+  // --- Loading and Error States ---
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState({ type: '', text: '' })
+
   // --- Personal Settings ---
-  const [name, setName] = useState('Test User')
-  const [email, setEmail] = useState('you@example.com')
-  const [major, setMajor] = useState('Computer Science')
-  const [year, setYear] = useState('Senior')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [major, setMajor] = useState('')
+  const [year, setYear] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -29,38 +37,191 @@ export default function SettingsPage() {
   // --- Theme Settings ---
   const [darkMode, setDarkMode] = useState(true)
 
+  // Load user data and settings
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        setLoading(true)
+        
+        // Load user profile
+        const userData = await getProfile()
+        console.log('User profile:', userData)
+        
+        // Load user settings
+        const settingsData = await getSettings()
+        console.log('User settings:', settingsData)
+        
+        // Set personal info
+        setName(userData.name || userData.username || '')
+        setEmail(userData.email || '')
+        setMajor(userData.major || '')
+        setYear(userData.year || '')
+        
+        // Set privacy settings
+        if (settingsData) {
+          setEmailNotifications(settingsData.emailNotifications !== false)
+          setShowPostHistory(settingsData.showPostHistory !== false)
+          setAllowReplies(settingsData.allowReplies !== false)
+        }
+        
+        // Set theme (default to dark mode)
+        setDarkMode(settingsData?.darkMode !== false)
+        
+      } catch (err) {
+        console.error('Failed to load user data:', err)
+        setMessage({ type: 'error', text: 'Failed to load user data. Please try again.' })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadUserData()
+  }, [])
+
   // apply dark mode class
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode)
   }, [darkMode])
 
-  // handlers (stubbed)
-  const savePersonal = e => {
-    e.preventDefault()
-    console.log('Saved personal:', { name, email, major, year })
+  // Show message helper
+  const showMessage = (type, text) => {
+    setMessage({ type, text })
+    setTimeout(() => setMessage({ type: '', text: '' }), 3000)
   }
-  const changePassword = e => {
+
+  // handlers
+  const savePersonal = async (e) => {
+    e.preventDefault()
+    try {
+      setSaving(true)
+      
+      const updateData = {
+        name,
+        email,
+        major,
+        year
+      }
+      
+      await updateProfile(updateData)
+      showMessage('success', 'Personal information updated successfully!')
+      
+    } catch (err) {
+      console.error('Failed to update profile:', err)
+      showMessage('error', err.message || 'Failed to update personal information')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const changePassword = async (e) => {
     e.preventDefault()
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match')
+      showMessage('error', 'Passwords do not match')
       return
     }
-    console.log('Password changed:', { currentPassword, newPassword })
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
+    if (newPassword.length < 6) {
+      showMessage('error', 'Password must be at least 6 characters')
+      return
+    }
+    
+    try {
+      setSaving(true)
+      
+      await updateProfile({
+        currentPassword,
+        newPassword
+      })
+      
+      showMessage('success', 'Password updated successfully!')
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      
+    } catch (err) {
+      console.error('Failed to change password:', err)
+      showMessage('error', err.message || 'Failed to update password')
+    } finally {
+      setSaving(false)
+    }
   }
-  const savePrivacy = e => {
+
+  const savePrivacy = async (e) => {
     e.preventDefault()
-    console.log('Saved privacy:', { emailNotifications, showPostHistory, allowReplies })
+    try {
+      setSaving(true)
+      
+      await updateSettings({
+        emailNotifications,
+        showPostHistory,
+        allowReplies
+      })
+      
+      showMessage('success', 'Privacy settings updated successfully!')
+      
+    } catch (err) {
+      console.error('Failed to update privacy settings:', err)
+      showMessage('error', err.message || 'Failed to update privacy settings')
+    } finally {
+      setSaving(false)
+    }
   }
-  const saveTheme = e => {
+
+  const saveTheme = async (e) => {
     e.preventDefault()
-    console.log('Saved theme:', { darkMode })
+    try {
+      setSaving(true)
+      
+      await updateSettings({
+        darkMode
+      })
+      
+      showMessage('success', 'Theme updated successfully!')
+      
+    } catch (err) {
+      console.error('Failed to update theme:', err)
+      showMessage('error', err.message || 'Failed to update theme')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading settings...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 py-8 px-4">
+      {/* Message Banner */}
+      {message.text && (
+        <div className={`max-w-3xl mx-auto mb-6 p-4 rounded-lg flex items-center justify-between ${
+          message.type === 'success' 
+            ? 'bg-green-600/20 border border-green-500/30 text-green-300' 
+            : 'bg-red-600/20 border border-red-500/30 text-red-300'
+        }`}>
+          <div className="flex items-center">
+            {message.type === 'success' ? (
+              <CheckIcon className="h-5 w-5 mr-2" />
+            ) : (
+              <XIcon className="h-5 w-5 mr-2" />
+            )}
+            {message.text}
+          </div>
+          <button 
+            onClick={() => setMessage({ type: '', text: '' })}
+            className="text-gray-400 hover:text-white"
+          >
+            <XIcon className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="max-w-3xl mx-auto space-y-12">
         {/* Personal Settings */}
         <section className="bg-gray-850 bg-opacity-60 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
@@ -76,6 +237,7 @@ export default function SettingsPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 className="w-full bg-transparent border border-gray-700 rounded-lg p-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                placeholder="Enter your name"
               />
             </div>
             <div>
@@ -85,6 +247,7 @@ export default function SettingsPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="w-full bg-transparent border border-gray-700 rounded-lg p-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                placeholder="Enter your email"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -95,10 +258,15 @@ export default function SettingsPage() {
                   onChange={e => setMajor(e.target.value)}
                   className="w-full bg-transparent border border-gray-700 rounded-lg p-3 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                 >
-                  <option>Computer Science</option>
-                  <option>Engineering</option>
-                  <option>Business</option>
-                  <option>Arts</option>
+                  <option value="">Select Major</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Business">Business</option>
+                  <option value="Arts">Arts</option>
+                  <option value="Science">Science</option>
+                  <option value="Medicine">Medicine</option>
+                  <option value="Law">Law</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div>
@@ -108,17 +276,20 @@ export default function SettingsPage() {
                   onChange={e => setYear(e.target.value)}
                   className="w-full bg-transparent border border-gray-700 rounded-lg p-3 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                 >
-                  <option>Freshman</option>
-                  <option>Sophomore</option>
-                  <option>Junior</option>
-                  <option>Senior</option>
+                  <option value="">Select Year</option>
+                  <option value="Freshman">Freshman</option>
+                  <option value="Sophomore">Sophomore</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Senior">Senior</option>
+                  <option value="Graduate">Graduate</option>
                 </select>
               </div>
             </div>
+            
             {/* Change Password */}
             <div className="mt-4 bg-gray-800 bg-opacity-50 rounded-lg p-4 space-y-3">
               <h3 className="flex items-center text-lg font-semibold">
-                <LockClosedIcon className="h-5 w-5 mr-2 text-pink-400" />
+                <LockClosedIcon className="h-5 w-5 mr-2 text-emerald-400" />
                 Change Password
               </h3>
               <div>
@@ -128,6 +299,7 @@ export default function SettingsPage() {
                   value={currentPassword}
                   onChange={e => setCurrentPassword(e.target.value)}
                   className="w-full bg-transparent border border-gray-700 rounded-lg p-2 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  placeholder="Enter current password"
                 />
               </div>
               <div>
@@ -137,6 +309,7 @@ export default function SettingsPage() {
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
                   className="w-full bg-transparent border border-gray-700 rounded-lg p-2 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  placeholder="Enter new password"
                 />
               </div>
               <div>
@@ -146,22 +319,25 @@ export default function SettingsPage() {
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   className="w-full bg-transparent border border-gray-700 rounded-lg p-2 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  placeholder="Confirm new password"
                 />
               </div>
               <button
                 type="button"
                 onClick={changePassword}
-                className="mt-2 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition"
+                disabled={saving}
+                className="mt-2 bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Update Password
+                {saving ? 'Updating...' : 'Update Password'}
               </button>
             </div>
 
             <button
               type="submit"
-              className="mt-4 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition"
+              disabled={saving}
+              className="mt-4 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Personal
+              {saving ? 'Saving...' : 'Save Personal Info'}
             </button>
           </form>
         </section>
@@ -169,7 +345,7 @@ export default function SettingsPage() {
         {/* Privacy Settings */}
         <section className="bg-gray-850 bg-opacity-60 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
           <h2 className="flex items-center text-2xl font-bold mb-4">
-            <BellIcon className="h-6 w-6 mr-2 text-lime-400" />
+            <BellIcon className="h-6 w-6 mr-2 text-emerald-400" />
             Privacy Settings
           </h2>
           <form onSubmit={savePrivacy} className="space-y-4">
@@ -182,7 +358,7 @@ export default function SettingsPage() {
                   onChange={e => setEmailNotifications(e.target.checked)}
                   className="sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-lime-500 transition" />
+                <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition" />
                 <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition" />
               </label>
             </div>
@@ -195,7 +371,7 @@ export default function SettingsPage() {
                   onChange={e => setShowPostHistory(e.target.checked)}
                   className="sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-lime-500 transition" />
+                <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition" />
                 <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition" />
               </label>
             </div>
@@ -208,15 +384,16 @@ export default function SettingsPage() {
                   onChange={e => setAllowReplies(e.target.checked)}
                   className="sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-lime-500 transition" />
+                <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition" />
                 <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition" />
               </label>
             </div>
             <button
               type="submit"
-              className="mt-2 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition"
+              disabled={saving}
+              className="mt-2 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Privacy
+              {saving ? 'Saving...' : 'Save Privacy Settings'}
             </button>
           </form>
         </section>
@@ -236,7 +413,7 @@ export default function SettingsPage() {
                 name="theme"
                 checked={!darkMode}
                 onChange={() => setDarkMode(false)}
-                className="form-radio h-5 w-5 text-lime-400"
+                className="form-radio h-5 w-5 text-emerald-400"
               />
             </div>
             <div className="flex items-center space-x-3">
@@ -247,14 +424,15 @@ export default function SettingsPage() {
                 name="theme"
                 checked={darkMode}
                 onChange={() => setDarkMode(true)}
-                className="form-radio h-5 w-5 text-lime-400"
+                className="form-radio h-5 w-5 text-emerald-400"
               />
             </div>
             <button
               type="submit"
-              className="mt-2 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition"
+              disabled={saving}
+              className="mt-2 bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 rounded-full text-white font-semibold hover:scale-105 transform transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Theme
+              {saving ? 'Saving...' : 'Save Theme'}
             </button>
           </form>
         </section>

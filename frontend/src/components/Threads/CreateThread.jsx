@@ -1,5 +1,6 @@
 // src/components/CreateThread.jsx
 import React, { useState, useEffect } from 'react'
+import { XIcon as XMarkIcon, PaperClipIcon, PhotographIcon as PhotoIcon, DocumentIcon } from '@heroicons/react/outline'
 
 export default function CreateThread({ onClose, onCreate }) {
   const [content, setContent] = useState('')
@@ -46,89 +47,114 @@ export default function CreateThread({ onClose, onCreate }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Enhanced backdrop with blur */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-60"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* modal */}
-      <div className="relative bg-gray-850 bg-opacity-80 backdrop-blur-lg rounded-2xl p-6 max-w-md w-full shadow-xl">
-        <h2 className="text-xl font-semibold text-white mb-4">
-          Create a New Thread
-        </h2>
+      {/* Enhanced modal */}
+      <div className="relative bg-gradient-to-br from-gray-800/95 to-gray-900/95 backdrop-blur-xl rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-gray-600/30 animate-in slide-in-from-bottom-4 duration-300">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl">
+              <PhotoIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">
+                Create New Thread
+              </h2>
+              <p className="text-gray-400 text-sm">Share your thoughts with the community</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-700/50 rounded-xl transition-colors duration-200 group"
+          >
+            <XMarkIcon className="h-6 w-6 text-gray-400 group-hover:text-white transition-colors" />
+          </button>
+        </div>
 
-        {/* text */}
-        <textarea
-          rows={4}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="What are you thinking?"
-          className="w-full bg-transparent border border-gray-700 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
-        />
+        {/* Enhanced textarea */}
+        <div className="relative mb-6">
+          <textarea
+            rows={5}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="What's on your mind? Share your thoughts, questions, or experiences..."
+            className="w-full bg-gray-700/30 border border-gray-600/50 rounded-2xl p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all duration-300 resize-none"
+            style={{ minHeight: '120px' }}
+          />
+          <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+            {content.length}/500
+          </div>
+        </div>
 
-        {/* file upload */}
-        <div className="mt-4">
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <span className="flex items-center space-x-1 px-3 py-1 bg-gray-700 rounded-md text-sm text-gray-200 hover:bg-gray-600 transition">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828M13 5l7 7m0 0l-7 7m7-7H6"
-                />
-              </svg>
-              <span>Attach File</span>
-            </span>
-          </label>
-
-          {file && (
-            <div className="mt-2 flex items-center space-x-3 text-sm text-gray-300">
-              {preview ? (
-                <img
-                  src={preview}
-                  alt="preview"
-                  className="h-12 w-12 object-cover rounded-lg"
-                />
-              ) : (
-                <span className="truncate">{file.name}</span>
-              )}
+        {/* Enhanced file upload */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-3">
+            <label className="flex items-center space-x-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 border border-orange-500/20">
+              <PaperClipIcon className="h-5 w-5 text-orange-400" />
+              <span className="text-orange-300 text-sm font-medium">Attach File</span>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/*,.pdf,.doc,.docx"
+              />
+            </label>
+            
+            {file && (
               <button
                 onClick={handleRemoveFile}
-                className="text-red-400 hover:text-red-500"
+                className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-xl transition-all duration-300 hover:scale-105 border border-red-500/20"
               >
-                ✕
+                <XMarkIcon className="h-4 w-4 text-red-400" />
               </button>
+            )}
+          </div>
+
+          {file && (
+            <div className="mt-3 p-3 bg-gray-700/30 rounded-xl border border-gray-600/30">
+              <div className="flex items-center space-x-3">
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="preview"
+                    className="h-12 w-12 object-cover rounded-lg border border-gray-600/30"
+                  />
+                ) : (
+                  <div className="h-12 w-12 bg-gray-600/50 rounded-lg flex items-center justify-center">
+                    <DocumentIcon className="h-6 w-6 text-gray-400" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate">{file.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* actions */}
-        <div className="mt-5 flex justify-end space-x-3">
+        {/* Enhanced actions */}
+        <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition"
+            className="px-6 py-3 rounded-xl border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500/50 transition-all duration-300 font-medium"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-5 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg text-white font-medium hover:scale-105 transform transition"
+            disabled={!content.trim() && !file}
+            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-white font-semibold hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            Post
+            Post Thread
           </button>
         </div>
       </div>
