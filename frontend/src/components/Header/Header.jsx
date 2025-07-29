@@ -15,7 +15,7 @@ export default function Header() {
   }
 
   const handleLogoClick = () => {
-    navigate("/")
+    user ? navigate("/threads") : navigate("/")
   }
 
   const handleLogout = async () => {
