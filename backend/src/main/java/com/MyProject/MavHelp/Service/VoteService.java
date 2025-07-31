@@ -58,9 +58,14 @@ public class VoteService {
                 default -> 0;
             };
             postAuthor.setPoints(postAuthor.getPoints() + points);
+
+
+            postAuthor.setPointsUpdatedAt(java.time.LocalDateTime.now());
+
             studentRepository.save(postAuthor);
         }
     }
+
     public void undoVote(Long postId, String type) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));

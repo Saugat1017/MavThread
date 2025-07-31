@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -47,6 +48,9 @@ public class Student {
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserSettings userSettings;
+    @Column(name = "points_updated_at")
+    private LocalDateTime pointsUpdatedAt;
+
 }
 
 

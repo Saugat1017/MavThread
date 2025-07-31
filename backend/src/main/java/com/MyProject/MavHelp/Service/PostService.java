@@ -8,6 +8,7 @@ import com.MyProject.MavHelp.dto.PostRequest;
 import com.MyProject.MavHelp.dto.PostResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -73,6 +74,7 @@ public class PostService {
         }
 
         studentRepository.save(replier);
+
         return "Reply posted successfully";
     }
 
@@ -202,6 +204,32 @@ public class PostService {
                 .map(this::buildThreadPostResponse)
                 .toList();
     }
+    public List<PostResponse> getAllPostsGlobal(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Post> posts = postRepository.findAllTopLevelPostsWithReplies(pageable);
+        return posts.stream().map(this::convertToResponse).toList();
+    }
+    private PostResponse convertToResponse(Post post) {
+        String author = post.isAnonymous() ? "Anonymous" : post.getStudent().getName();
+
+        return PostResponse.builder()
+                .id(post.getId())
+                .content(post.getContent())
+                .imageUrl(post.getImageUrl())
+                .anonymous(post.isAnonymous())
+                .authorName(author)
+                .createdAt(post.getCreatedAt())
+                .upvotes(post.getUpvotes())
+                .downvotes(post.getDownvotes())
+                .appreciations(post.getAppreciations())
+                .totalPoints(post.getTotalPoints())
+                .replies(post.getReplies().stream()
+                        .map(this::convertToResponse)
+                        .toList())
+                .build();
+    }
+
+
 
 
 

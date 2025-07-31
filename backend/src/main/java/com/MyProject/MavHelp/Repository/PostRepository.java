@@ -52,6 +52,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 """)
     List<Post> findTopLevelPostsWithReplies(String groupCode, Pageable pageable);
 
+    @Query("""
+    SELECT DISTINCT p FROM Post p
+    LEFT JOIN FETCH p.replies
+    WHERE p.parent IS NULL
+    ORDER BY p.createdAt DESC
+""")
+    List<Post> findAllTopLevelPostsWithReplies(Pageable pageable);
+
 
 
 
