@@ -25,4 +25,14 @@ public class DashboardController {
     public ResponseEntity<RankResponse> getMyRank() {
         return ResponseEntity.ok(dashboardService.getMyRank());
     }
+    @GetMapping("/leaderboard/weekly")
+    public ResponseEntity<List<StudentSummary>> getWeeklyGroupLeaderboard() {
+        return ResponseEntity.ok(dashboardService.getWeeklyTopInGroup());
+    }
+
+    @GetMapping("/leaderboard/all-time")
+    public ResponseEntity<List<StudentSummary>> getAllTimeLeaderboard() {
+        return ResponseEntity.ok(dashboardService.getAllTimeTopScorers());
+    }
+
 }

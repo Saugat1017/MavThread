@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -54,4 +55,34 @@ public class DashboardService {
                 .totalStudents(groupStudents.size())
                 .build();
     }
+    private Student getCurrentStudent() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return studentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+    }
+
+    public List<StudentSummary> getWeeklyTopInGroup() {
+        Student student = getCurrentStudent();
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+
+        return studentRepository.findTopInGroupThisWeek(student.getGroupCode(), oneWeekAgo).stream()
+                .limit(3)
+                .map(s -> StudentSummary.builder()
+                        .name(s.getName())
+                        .points(s.getPoints())
+                        .build())
+                .toList();
+    }
+
+    public List<StudentSummary> getAllTimeTopScorers() {
+        return studentRepository.findTopAllTime(org.springframework.data.domain.PageRequest.of(0, 3)).stream()
+                .map(s -> StudentSummary.builder()
+                        .name(s.getName())
+                        .points(s.getPoints())
+                        .build())
+                .toList();
+    }
+
+
+
 }
