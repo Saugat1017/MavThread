@@ -1,53 +1,69 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+// src/components/Header.jsx
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function Header() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
 
-  const handleLogin = () => {
-    navigate("/login")
-  }
+  // new state to track whether we're scrolled to top
+  const [isAtTop, setIsAtTop] = useState(true)
 
-  const handleSignUp = () => {
-    navigate("/signup")
-  }
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsAtTop(window.scrollY === 0)
+    }
 
-  const handleLogoClick = () => {
-    user ? navigate("/threads") : navigate("/")
-  }
+    // listen for scroll events
+    window.addEventListener('scroll', handleScroll)
+    // call once to initialize
+    handleScroll()
 
+    // cleanup
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleLogin = () => navigate('/login')
+  const handleSignUp = () => navigate('/signup')
+  const handleLogoClick = () => user ? navigate('/threads') : navigate('/')
   const handleLogout = async () => {
     try {
       await logout()
-      navigate("/login")
+      navigate('/login')
     } catch (error) {
       console.error('Logout failed:', error)
     }
   }
 
+  // if not at top, render nothing
+  if (!isAtTop) return null
+
   return (
-    <header className="fixed top-0 left-0 w-full backdrop-blur-md bg-white/10 z-50 p-3">
+    <header className="fixed top-0 left-0 w-full backdrop-blur-md bg-transparent z-50 p-3">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <h1 className="text-2xl font-extrabold tracking-wide cursor-pointer" onClick={handleLogoClick}>
+        <h1
+          className="text-2xl font-extrabold tracking-wide cursor-pointer"
+          onClick={handleLogoClick}
+        >
           <span className="text-white">MAV</span>
-          <span className="bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">THREAD</span>
+          <span className="bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+            THREAD
+          </span>
         </h1>
 
         {/* Nav buttons */}
         <div className="flex gap-4">
           {user ? (
-            // User is logged in - show logout and profile
             <>
-              <button 
+              <button
                 className="text-white border border-white px-4 py-1 rounded-md hover:bg-white hover:text-blue-600 transition"
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate('/profile')}
               >
                 PROFILE
               </button>
-              <button 
+              <button
                 className="bg-red-500 text-white px-4 py-1 rounded-md shadow-md hover:bg-red-400 transition"
                 onClick={handleLogout}
               >
@@ -55,15 +71,14 @@ export default function Header() {
               </button>
             </>
           ) : (
-            // User is not logged in - show login and signup
             <>
-              <button 
-                className="text-white border border-white px-4 py-1 rounded-md hover:bg-white hover:text-blue-600 transition" 
+              <button
+                className="text-white border border-white px-4 py-1 rounded-md hover:bg-white hover:text-blue-600 transition"
                 onClick={handleLogin}
               >
                 LOGIN
               </button>
-              <button 
+              <button
                 className="bg-lime-500 text-white px-4 py-1 rounded-md shadow-md hover:bg-lime-300 transition"
                 onClick={handleSignUp}
               >
@@ -74,5 +89,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }
