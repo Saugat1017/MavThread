@@ -187,7 +187,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br  from-black via-slate-900 to-black text-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400 mx-auto mb-4"></div>
           <p className="text-gray-300">Loading settings...</p>
@@ -197,7 +197,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br  from-black via-slate-900 to-black text-gray-100 py-8 px-4">
       {/* Message Banner */}
       {message.text && (
         <div className={`max-w-3xl mx-auto mb-6 p-4 rounded-lg flex items-center justify-between ${

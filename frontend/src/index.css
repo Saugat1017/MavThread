@@ -4,5 +4,23 @@
 
 
 html, body, #root {
-  @apply bg-gray-800;
+  @apply bg-gray-900;
+}
+
+.thread-card {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease, box-shadow 0.5s ease;
+  /* fallback for older browsers: */
+  backface-visibility: hidden;
+}
+.thread-card:hover {
+  /* tilt it and lift it up */
+  transform: translateY(-10px)
+             rotateX(5deg)
+             rotateY(-5deg)
+             scale(1.02);
+  /* stronger, layered shadow */
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.45),
+    0 10px 20px rgba(0,0,0,0.35);
 }

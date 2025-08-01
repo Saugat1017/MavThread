@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr  from-black via-slate-900 to-black text-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400 mx-auto mb-4"></div>
           <p className="text-gray-300">Loading your profile...</p>
@@ -55,7 +55,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr  from-black via-slate-900 to-black text-gray-100">
         <div className="text-center">
           <UserCircleIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-300">Unable to load profile. Please log in again.</p>
@@ -65,7 +65,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100">
+    <div className="min-h-screen bg-gradient-to-tr  from-black via-slate-900 to-black text-gray-100">
       <div className="container mx-auto px-6 py-8">
         {/* Profile Header */}
         <div className="text-center mb-12">

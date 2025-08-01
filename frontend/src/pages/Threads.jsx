@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import CreateThread from '../components/Threads/CreateThread'
 import ReplyModal from '../components/Threads/ReplyModal'
 import Footer from '../components/Footer/Footer'
+
 import {
   ThumbUpIcon,
   HeartIcon,
@@ -17,7 +18,9 @@ import {
 } from '@heroicons/react/outline'
 import {
   getGroupPosts,
+  // getAllPosts,
   createPost,
+  getRecentPosts,
   replyPost,
   votePost,
 } from '../services/api'
@@ -36,6 +39,7 @@ export default function ThreadsPage() {
   async function fetchThreads() {
     try {
       setLoading(true)
+      // Use getAllPosts to get all threads, not just group-specific ones
       const data = await getGroupPosts()
       console.log("Threads: ", data)
       const list = Array.isArray(data) ? data : data.posts || []
@@ -157,7 +161,7 @@ export default function ThreadsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr  from-black via-slate-900 to-black text-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-300">Loading threads...</p>
@@ -167,7 +171,7 @@ export default function ThreadsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-slate-900 via-slate-700 to-slate-900 text-gray-100">
+    <div className="min-h-screen bg-gradient-to-tr from-black via-slate-900 to-black text-gray-100 pb-24">
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Enhanced Header */}
         <div className="mb-8 pt-8">
@@ -198,10 +202,17 @@ export default function ThreadsPage() {
           {threads.map((t, index) => (
             <div
               key={t.id}
+              style={{ perspective: '1000px' }}
               className="relative group"
             >
               {/* Main Thread Card */}
-              <div className="relative bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-xl p-6 rounded-2xl shadow-xl border border-gray-600/30 hover:border-orange-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10">
+              <div className="thread-card
+             bg-gradient-to-r from-gray-800/80 to-gray-700/80
+             backdrop-blur-xl p-6 rounded-2xl
+             border border-gray-600/30
+             transition-all duration-300
+             hover:border-orange-500/50  
+             shadow-[0_10px_10px_rgba(0,0,0,0.4)]">
                 {/* Thread Connection Line */}
                 {index < threads.length - 1 && (
                   <div className="absolute left-8 top-full w-0.5 h-6 bg-gradient-to-b from-orange-500 to-transparent z-0"></div>
