@@ -1,4 +1,4 @@
-package com.MyProject.MavHelp.Config;
+package com.MyProject.MavHelp.config;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
