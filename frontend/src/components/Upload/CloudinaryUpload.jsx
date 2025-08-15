@@ -1,6 +1,5 @@
 // src/components/CreateThread.jsx
 import React, { useState } from 'react'
-import axios from 'axios'
 import {
   XIcon as XMarkIcon,
   PaperClipIcon,
@@ -15,14 +14,18 @@ export default function CreateThread({ onClose, onCreate }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
 
-  const maxFileSize = 10 * 1024 * 1024 // 10 MB
+  const MAX_FILE_SIZE = 10 * 1024 * 1024  // 10 MB
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
+    console.log('📁 handleFileChange fired')
+    console.log('  • cloud name:', import.meta.env.VITE_CLOUDINARY_CLOUD_NAME)
+    console.log('  • upload preset:', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS)
+
     setError('')
-    if (file.size > maxFileSize) {
+    if (file.size > MAX_FILE_SIZE) {
       setError('File exceeds 10 MB limit.')
       return
     }
@@ -30,32 +33,40 @@ export default function CreateThread({ onClose, onCreate }) {
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
-    formData.append(
-      'upload_preset',
-      import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS
-    )
+    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS)
 
     try {
-      // Upload to Cloudinary only
-      const { data } = await axios.post(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        formData
-      )
+      const url = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`
+      console.log('  → fetch URL:', url)
+
+      const resp = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      })
+
+      console.log('  ← status:', resp.status, 'ok?', resp.ok)
+      const payload = await resp.json()
+      console.log('  ← Cloudinary payload:', payload)
+
+      if (!resp.ok) {
+        throw new Error(payload.error?.message || 'Upload failed')
+      }
 
       const fileObj = {
-        id: data.public_id,
-        url: data.secure_url,
+        id:   payload.public_id,
+        url:  payload.secure_url,
         name: file.name,
         size: file.size,
         type: file.type,
       }
+
       setUploadedFiles((prev) => [...prev, fileObj])
-    } catch (err) {
-      console.error('Cloudinary upload error:', err)
-      setError('Upload failed. Try again.')
+    } catch (uploadErr) {
+      console.error('Upload failed:', uploadErr)
+      setError(uploadErr.message)
     } finally {
       setUploading(false)
-      e.target.value = null
+      e.target.value = null  // allow re-selecting same file if needed
     }
   }
 
@@ -83,6 +94,7 @@ export default function CreateThread({ onClose, onCreate }) {
       />
 
       <div className="relative bg-gradient-to-br from-gray-800/95 to-gray-900/95 backdrop-blur-xl rounded-3xl p-8 max-w-2xl w-full shadow-2xl border border-gray-600/30 max-h-[90vh] overflow-y-auto">
+        
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
@@ -98,10 +110,7 @@ export default function CreateThread({ onClose, onCreate }) {
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-700/50 rounded-xl"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-700/50 rounded-xl">
             <XMarkIcon className="h-6 w-6 text-gray-400 hover:text-white" />
           </button>
         </div>
@@ -127,7 +136,7 @@ export default function CreateThread({ onClose, onCreate }) {
             <h3 className="text-lg font-semibold text-white">Attachments</h3>
             <button
               onClick={() => setShowUpload((v) => !v)}
-              className="flex items-center space-x-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl transition-all border border-orange-500/20"
+              className="flex items-center space-x-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl border border-orange-500/20 transition-all"
             >
               <PaperClipIcon className="h-5 w-5 text-orange-400" />
               <span className="text-orange-300 text-sm font-medium">
@@ -144,18 +153,14 @@ export default function CreateThread({ onClose, onCreate }) {
                 disabled={uploading}
                 className="block w-full text-sm text-gray-100 mb-2"
               />
-              {uploading && (
-                <p className="text-xs text-gray-400">Uploading…</p>
-              )}
+              {uploading && <p className="text-xs text-gray-400">Uploading…</p>}
               {error && <p className="text-xs text-red-500">{error}</p>}
             </div>
           )}
 
           {uploadedFiles.length > 0 && (
             <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-300">
-                Attached Files:
-              </h4>
+              <h4 className="text-sm font-medium text-gray-300">Attached Files:</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {uploadedFiles.map((file) => (
                   <div
@@ -175,9 +180,7 @@ export default function CreateThread({ onClose, onCreate }) {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white truncate">
-                          {file.name}
-                        </p>
+                        <p className="text-sm text-white truncate">{file.name}</p>
                         <p className="text-xs text-gray-400">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>

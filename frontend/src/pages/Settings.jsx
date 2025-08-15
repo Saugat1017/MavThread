@@ -260,12 +260,41 @@ export default function SettingsPage() {
                 >
                   <option value="">Select Major</option>
                   <option value="Computer Science">Computer Science</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Business">Business</option>
-                  <option value="Arts">Arts</option>
-                  <option value="Science">Science</option>
-                  <option value="Medicine">Medicine</option>
-                  <option value="Law">Law</option>
+                  <option value="Computer Engineering">Computer Engineering</option>
+                  <option value="Electrical Engineering">Electrical Engineering</option>
+                  <option value="Mechanical Engineering">Mechanical Engineering</option>
+                  <option value="Civil Engineering">Civil Engineering</option>
+                  <option value="Chemical Engineering">Chemical Engineering</option>
+                  <option value="Biomedical Engineering">Biomedical Engineering</option>
+                  <option value="Aerospace Engineering">Aerospace Engineering</option>
+                  <option value="Industrial Engineering">Industrial Engineering</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Biology">Biology</option>
+                  <option value="Business Administration">Business Administration</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Accounting">Accounting</option>
+                  <option value="Economics">Economics</option>
+                  <option value="Psychology">Psychology</option>
+                  <option value="Sociology">Sociology</option>
+                  <option value="Political Science">Political Science</option>
+                  <option value="History">History</option>
+                  <option value="English">English</option>
+                  <option value="Philosophy">Philosophy</option>
+                  <option value="Art">Art</option>
+                  <option value="Music">Music</option>
+                  <option value="Theater">Theater</option>
+                  <option value="Communications">Communications</option>
+                  <option value="Journalism">Journalism</option>
+                  <option value="Education">Education</option>
+                  <option value="Nursing">Nursing</option>
+                  <option value="Pre-Medicine">Pre-Medicine</option>
+                  <option value="Pre-Law">Pre-Law</option>
+                  <option value="Environmental Science">Environmental Science</option>
+                  <option value="Geology">Geology</option>
+                  <option value="Astronomy">Astronomy</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
@@ -342,7 +371,7 @@ export default function SettingsPage() {
           </form>
         </section>
 
-        {/* Privacy Settings */}
+        {/* Privacy Settings
         <section className="bg-gray-850 bg-opacity-60 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
           <h2 className="flex items-center text-2xl font-bold mb-4">
             <BellIcon className="h-6 w-6 mr-2 text-emerald-400" />
@@ -396,9 +425,9 @@ export default function SettingsPage() {
               {saving ? 'Saving...' : 'Save Privacy Settings'}
             </button>
           </form>
-        </section>
+        </section> */}
 
-        {/* Theme Settings */}
+        {/* Theme Settings
         <section className="bg-gray-850 bg-opacity-60 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
           <h2 className="flex items-center text-2xl font-bold mb-4">
             <CogIcon className="h-6 w-6 mr-2 text-blue-400" />
@@ -435,7 +464,7 @@ export default function SettingsPage() {
               {saving ? 'Saving...' : 'Save Theme'}
             </button>
           </form>
-        </section>
+        </section> */}
       </div>
     </div>
   )

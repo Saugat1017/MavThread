@@ -73,6 +73,7 @@ export const deletePost = (postId) => request(`/posts/${postId}/delete`, { metho
 export const getMyHistory = () => request('/posts/my-history')
 export const getMyPosts = (limit = 10, page = 1) => request('/posts/mine', { params: { limit, page } })
 export const getRecentPosts = () => request('/posts/recent')
+export const getAllPosts = () => request('/posts/global')
 
 // ❤️ VOTE SYSTEM
 export const votePost = (postId, type) => request(`/posts/${postId}/vote`, { method: 'POST', body: { type } })
@@ -81,7 +82,8 @@ export const removeVote = (postId) => request(`/posts/${postId}/vote`, { method:
 // 📊 DASHBOARD
 export const getGroupLeaderboard = () => request('/dashboard/group-leaderboard')
 export const getMyRank = () => request('/dashboard/my-rank')
-export const getLeaderboard = () => request('/posts/leaderboard')
+export const getLeaderboard = () => request('/dashboard/leaderboard/all-time')
+export const getWeeklyLeaderboard = () => request('/dashboar/leaderboard/weekly')
 
 // 🧰 ADMIN (optional)
 export const reportPost = (postId) => request(`/admin/${postId}`, { method: 'POST' })

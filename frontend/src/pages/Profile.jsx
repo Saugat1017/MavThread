@@ -8,6 +8,8 @@ import {
   StarIcon,
   CalendarIcon,
   SparklesIcon,
+  AcademicCapIcon,
+  ClockIcon,
 } from '@heroicons/react/outline'
 import ThreadCard from '../components/Threads/ThreadCard'
 import { getProfile, getMyPosts, getMyHistory } from '../services/api'
@@ -82,6 +84,23 @@ export default function ProfilePage() {
           <h1 className="text-4xl font-bold text-white mb-3">
             {user.name || user.username || user.email || 'User'}
           </h1>
+          
+          {/* Major and Year Information */}
+          <div className="flex items-center justify-center space-x-4 mb-4">
+            {user.major && (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-emerald-500/20 rounded-full border border-emerald-500/30">
+                <AcademicCapIcon className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm text-emerald-300 font-medium">{user.major}</span>
+              </div>
+            )}
+            {user.year && (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-orange-500/20 rounded-full border border-orange-500/30">
+                <ClockIcon className="h-4 w-4 text-orange-400" />
+                <span className="text-sm text-orange-300 font-medium">{user.year}</span>
+              </div>
+            )}
+          </div>
+          
           {user.bio && (
             <p className="text-gray-300 max-w-lg mx-auto leading-relaxed mb-4">
               {user.bio}
