@@ -202,6 +202,12 @@ export default function ThreadsPage() {
       
       console.log('Vote Debug:', { postId, type, currentVote })
       
+      // Store original vote counts for error handling
+      const currentThread = threads.find(t => t.id === postId)
+      const originalUpvotes = currentThread?.upvotes || 0
+      const originalDownvotes = currentThread?.downvotes || 0
+      const originalAppreciations = currentThread?.appreciations || 0
+      
       // Handle like/unlike logic
       if (type === 'appreciation') {
         if (currentVote === 'appreciation') {
@@ -296,17 +302,50 @@ export default function ThreadsPage() {
         )
       )
 
-      // Temporarily comment out API call to test local logic
-      // await votePost(postId, type)
-      console.log('Local state updated successfully')
+      // Send vote to backend (with graceful fallback)
+      try {
+        await votePost(postId, type)
+        console.log('Vote sent to backend successfully')
+      } catch (backendErr) {
+        // If backend fails, log the error but don't revert local state
+        console.warn('Backend vote failed, but keeping local state for better UX:', {
+          error: backendErr.message,
+          status: backendErr.status,
+          postId,
+          type
+        })
+        
+        // Show a subtle notification instead of alert
+        if (backendErr.status === 404) {
+          console.info('Vote endpoint not found - backend may not be implemented yet')
+        } else if (backendErr.status === 401) {
+          console.warn('User not authenticated for voting')
+        }
+      }
     } catch (err) {
-      console.error('Failed to vote:', err)
-      // Revert state on error
+      // This catch block is now only for unexpected errors in the vote logic itself
+      console.error('Unexpected error in vote handling:', err)
+      
+      // Revert both userVotes and threads state on error
       setUserVotes(prev => {
         const newState = { ...prev }
         delete newState[postId]
         return newState
       })
+      
+      // Revert thread counts to previous state
+      setThreads(prev =>
+        prev.map(t =>
+          t.id === postId
+            ? {
+                ...t,
+                upvotes: originalUpvotes,
+                downvotes: originalDownvotes,
+                appreciations: originalAppreciations
+              }
+            : t
+        )
+      )
     }
   }
 
@@ -471,49 +510,59 @@ export default function ThreadsPage() {
                       {t.files && t.files.map((file, fileIndex) => (
                         <div
                           key={`file-${fileIndex}`}
-                          className="relative bg-gray-700/30 rounded-lg p-3 border border-gray-600/30"
+                          className="relative group"
                         >
                           {file.type.startsWith('image/') ? (
                             <div 
-                              className="cursor-pointer group"
+                              className="cursor-pointer relative overflow-hidden rounded-2xl shadow-2xl"
                               onClick={() => setSelectedImage(file)}
                             >
                               <img
                                 src={file.url}
                                 alt={file.name}
-                                className="w-full h-48 object-cover rounded-lg border border-gray-600/30 transition-all duration-300 group-hover:scale-105 group-hover:border-orange-500/50"
+                                className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-1"
                               />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-lg flex items-center justify-center">
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-sm font-medium">
-                                  Click to expand
-                                </div>
+                              {/* Gradient overlay on hover */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                              
+                              {/* Hover effect overlay */}
+                              <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/10 transition-all duration-500 rounded-2xl"></div>
+                              
+                              {/* Click indicator */}
+                              <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                </svg>
                               </div>
+                              
+                              {/* Subtle border glow */}
+                              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-orange-500/30 transition-all duration-500"></div>
                             </div>
                           ) : file.type.startsWith('video/') ? (
-                            <video
-                              src={file.url}
-                              controls
-                              className="w-full h-48 object-cover rounded-lg border border-gray-600/30"
-                            />
+                            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+                              <video
+                                src={file.url}
+                                controls
+                                className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-105"
+                              />
+                              {/* Video indicator */}
+                              <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
+                                <span className="text-white text-xs font-medium">VIDEO</span>
+                              </div>
+                            </div>
                           ) : (
-                            <div className="w-full h-48 bg-gray-600/50 rounded-lg flex items-center justify-center">
-                              <DocumentIcon className="h-12 w-12 text-gray-400" />
+                            <div className="w-full h-64 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center shadow-2xl border border-gray-600/30">
+                              <DocumentIcon className="h-16 w-16 text-gray-400" />
                             </div>
                           )}
-                          <div className="mt-3">
-                            <p className="text-sm text-white truncate">{file.name}</p>
-                            <p className="text-xs text-gray-400">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
                         </div>
                       ))}
                       
                       {/* Display legacy imageUrl if no files array or as fallback */}
                       {t.imageUrl && (!t.files || t.files.length === 0) && (
-                        <div className="relative bg-gray-700/30 rounded-lg p-3 border border-gray-600/30">
+                        <div className="relative group">
                           <div 
-                            className="cursor-pointer group"
+                            className="cursor-pointer relative overflow-hidden rounded-2xl shadow-2xl"
                             onClick={() => setSelectedImage({
                               url: t.imageUrl,
                               name: 'Image',
@@ -524,32 +573,40 @@ export default function ThreadsPage() {
                             <img
                               src={t.imageUrl}
                               alt="Thread image"
-                              className="w-full h-48 object-cover rounded-lg border border-gray-600/30 transition-all duration-300 group-hover:scale-105 group-hover:border-orange-500/50"
+                              className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-1"
                             />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-lg flex items-center justify-center">
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-sm font-medium">
-                                Click to expand
-                              </div>
+                            {/* Gradient overlay on hover */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                            
+                            {/* Hover effect overlay */}
+                            <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/10 transition-all duration-500 rounded-2xl"></div>
+                            
+                            {/* Click indicator */}
+                            <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                              </svg>
                             </div>
-                          </div>
-                          <div className="mt-3">
-                            <p className="text-sm text-white truncate">Thread Image</p>
-                            <p className="text-xs text-gray-400">Image attachment</p>
+                            
+                            {/* Subtle border glow */}
+                            <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-orange-500/30 transition-all duration-500"></div>
                           </div>
                         </div>
                       )}
                       
                       {/* Display legacy videoUrl if no files array or as fallback */}
                       {t.videoUrl && (!t.files || t.files.length === 0) && (
-                        <div className="relative bg-gray-700/30 rounded-lg p-3 border border-gray-600/30">
-                          <video
-                            src={t.videoUrl}
-                            controls
-                            className="w-full h-48 object-cover rounded-lg border border-gray-600/30"
-                          />
-                          <div className="mt-3">
-                            <p className="text-sm text-white truncate">Thread Video</p>
-                            <p className="text-xs text-gray-400">Video attachment</p>
+                        <div className="relative group">
+                          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+                            <video
+                              src={t.videoUrl}
+                              controls
+                              className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-105"
+                            />
+                            {/* Video indicator */}
+                            <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
+                              <span className="text-white text-xs font-medium">VIDEO</span>
+                            </div>
                           </div>
                         </div>
                       )}

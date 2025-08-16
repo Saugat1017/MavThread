@@ -67,7 +67,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr  from-black via-slate-900 to-black text-gray-100">
+    <div className="min-h-screen bg-gradient-to-tr  from-black via-slate-900 to-black text-gray-100 pb-24">
       <div className="container mx-auto px-6 py-8">
         {/* Profile Header */}
         <div className="text-center mb-12">
@@ -168,6 +168,10 @@ export default function ProfilePage() {
                       upvotes: t.upvotes || 0,
                       downvotes: t.downvotes || 0,
                       appreciations: t.appreciations || 0,
+                      // Add file data for image display
+                      files: t.files || [],
+                      imageUrl: t.imageUrl || null,
+                      videoUrl: t.videoUrl || null,
                     }}
                   />
                 </div>

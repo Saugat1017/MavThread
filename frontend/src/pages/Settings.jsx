@@ -197,7 +197,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  from-black via-slate-900 to-black text-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br  from-black via-slate-900 to-black text-gray-100 py-8 px-4 pb-24">
       {/* Message Banner */}
       {message.text && (
         <div className={`max-w-3xl mx-auto mb-6 p-4 rounded-lg flex items-center justify-between ${
