@@ -2,16 +2,17 @@
 
 A modern, feature-rich social platform designed specifically for university students to connect, share, and engage with their campus community.
 
-![MavThread Banner](screenshots/home.png)
 
+![MavThread Banner](screenshots/home.png)
 ## ✨ Features
 
+![Home Page](screenshots/thread.png)
 ### 🏠 **Home & Navigation**
 - **Modern Dark Theme**: Beautiful gradient backgrounds with orange and emerald accents
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Intuitive Navigation**: Easy-to-use interface with smooth transitions
 
-![Home Page](screenshots/thread.png)
+![Thread Creation](screenshots/createThread.png)
 
 ### 📝 **Thread Creation & Management**
 - **Rich Text Posts**: Create engaging content with support for text, images, and videos
@@ -27,7 +28,9 @@ A modern, feature-rich social platform designed specifically for university stud
 - **Real-time Voting**: Instant reaction updates with smooth animations
 - **User Authentication**: Secure login and registration system
 
-![Interactive Features](screenshots/leaderboard.png)
+
+![Settings](screenshots/settings.png)
+![User Profile](screenshots/profile.png)
 
 ### 👤 **User Profiles & Settings**
 - **Personalized Profiles**: Display major, year, and activity statistics
@@ -35,10 +38,8 @@ A modern, feature-rich social platform designed specifically for university stud
 - **Activity Tracking**: View your posts, votes, and community contributions
 - **Major-based Filtering**: Connect with students in your field of study
 
-![User Profile](screenshots/profile.png)
 
-![Settings](screenshots/setting.png)
-
+![Interactive Features](screenshots/leaderboard.png)
 ### 🏆 **Leaderboard & Gamification**
 - **Weekly Rankings**: Compete with fellow students on the leaderboard
 - **Point System**: Earn points through engagement and helpful contributions
