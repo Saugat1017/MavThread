@@ -63,7 +63,40 @@ export default function ThreadsPage() {
       const data = await getAllPosts()
       console.log("Threads: ", data)
       const list = Array.isArray(data) ? data : data.posts || []
-      setThreads(list)
+      
+      // Debug: Log the first few threads to see their structure
+      if (list.length > 0) {
+        console.log("First thread structure:", list[0])
+        console.log("First thread files:", list[0].files)
+        console.log("First thread imageUrl:", list[0].imageUrl)
+        console.log("First thread videoUrl:", list[0].videoUrl)
+      }
+      
+      // Normalize the data structure to ensure files are properly formatted
+      const normalizedList = list.map(thread => {
+        // Handle case where files might be a JSON string
+        let normalizedFiles = thread.files
+        if (typeof thread.files === 'string') {
+          try {
+            normalizedFiles = JSON.parse(thread.files)
+          } catch (e) {
+            console.warn('Failed to parse files JSON:', thread.files)
+            normalizedFiles = []
+          }
+        }
+        
+        // Handle case where files might be null/undefined
+        if (!normalizedFiles) {
+          normalizedFiles = []
+        }
+        
+        return {
+          ...thread,
+          files: normalizedFiles
+        }
+      })
+      
+      setThreads(normalizedList)
     } catch (err) {
       console.error('Failed to load posts:', err)
     } finally {
@@ -83,12 +116,31 @@ export default function ThreadsPage() {
 
   async function handleCreate({ content, files = [] }) {
     try {
-      const newThread = await createPost(content)
-      console.log('New thread response:', newThread) // Debug log
-      
-      // Process uploaded files
+      // Process uploaded files to extract URLs
       const imageFiles = files.filter(file => file.type.startsWith('image/'))
       const videoFiles = files.filter(file => file.type.startsWith('video/'))
+      
+      // Prepare data to send to backend
+      const postData = {
+        content,
+        imageUrl: imageFiles.length > 0 ? imageFiles[0].url : null,
+        videoUrl: videoFiles.length > 0 ? videoFiles[0].url : null,
+        // Send all file URLs as an array for the backend to process
+        fileUrls: files.map(file => ({
+          url: file.url,
+          type: file.type,
+          name: file.name,
+          size: file.size
+        }))
+      }
+      
+      console.log('Sending post data to backend:', postData)
+      
+      const newThread = await createPost(postData)
+      console.log('New thread response:', newThread) // Debug log
+      console.log('New thread files:', newThread.files)
+      console.log('New thread imageUrl:', newThread.imageUrl)
+      console.log('New thread videoUrl:', newThread.videoUrl)
       
       // Add the new thread to the beginning of the list
       setThreads(prev => [{
@@ -411,13 +463,14 @@ export default function ThreadsPage() {
                   <p className="text-gray-100 text-lg leading-relaxed">{t.content}</p>
                 </div>
 
-                {/* File Attachments */}
-                {t.files && t.files.length > 0 && (
+                {/* File Attachments - Handle both new files array and legacy imageUrl/videoUrl */}
+                {(t.files && t.files.length > 0) || t.imageUrl || t.videoUrl ? (
                   <div className="mb-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {t.files.map((file, fileIndex) => (
+                      {/* Display files from the files array (new format) */}
+                      {t.files && t.files.map((file, fileIndex) => (
                         <div
-                          key={fileIndex}
+                          key={`file-${fileIndex}`}
                           className="relative bg-gray-700/30 rounded-lg p-3 border border-gray-600/30"
                         >
                           {file.type.startsWith('image/') ? (
@@ -455,9 +508,54 @@ export default function ThreadsPage() {
                           </div>
                         </div>
                       ))}
+                      
+                      {/* Display legacy imageUrl if no files array or as fallback */}
+                      {t.imageUrl && (!t.files || t.files.length === 0) && (
+                        <div className="relative bg-gray-700/30 rounded-lg p-3 border border-gray-600/30">
+                          <div 
+                            className="cursor-pointer group"
+                            onClick={() => setSelectedImage({
+                              url: t.imageUrl,
+                              name: 'Image',
+                              type: 'image/jpeg',
+                              size: 0
+                            })}
+                          >
+                            <img
+                              src={t.imageUrl}
+                              alt="Thread image"
+                              className="w-full h-48 object-cover rounded-lg border border-gray-600/30 transition-all duration-300 group-hover:scale-105 group-hover:border-orange-500/50"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-lg flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-sm font-medium">
+                                Click to expand
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <p className="text-sm text-white truncate">Thread Image</p>
+                            <p className="text-xs text-gray-400">Image attachment</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Display legacy videoUrl if no files array or as fallback */}
+                      {t.videoUrl && (!t.files || t.files.length === 0) && (
+                        <div className="relative bg-gray-700/30 rounded-lg p-3 border border-gray-600/30">
+                          <video
+                            src={t.videoUrl}
+                            controls
+                            className="w-full h-48 object-cover rounded-lg border border-gray-600/30"
+                          />
+                          <div className="mt-3">
+                            <p className="text-sm text-white truncate">Thread Video</p>
+                            <p className="text-xs text-gray-400">Video attachment</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
+                ) : null}
 
                 {/* Enhanced Actions with Like/Unlike */}
                 <div className="flex items-center justify-between">

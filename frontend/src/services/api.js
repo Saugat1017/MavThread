@@ -66,7 +66,7 @@ export const updateSettings = (prefs) => request('/user/settings', { method: 'PU
 export const deleteAccount = (confirm) => request('/user/delete', { method: 'DELETE', body: { confirm } })
 
 // 📝 POST & THREAD SYSTEM
-export const createPost = (content) => request('/posts/create', { method: 'POST', body: { content } })
+export const createPost = (data) => request('/posts/create', { method: 'POST', body: data })
 export const replyPost = (postId, content) => request(`/posts/${postId}/reply`, { method: 'POST', body: { content } })
 export const getGroupPosts = (flat = true) => request('/posts/group', { params: { flat } })
 export const deletePost = (postId) => request(`/posts/${postId}/delete`, { method: 'DELETE' })
