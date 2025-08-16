@@ -2,7 +2,7 @@
 
 A modern, feature-rich social platform designed specifically for university students to connect, share, and engage with their campus community.
 
-![MavThread Banner](screenshots/Screenshot%202025-08-16%20at%206.08.40%20PM.png)
+![MavThread Banner](screenshots/home.png)
 
 ## ✨ Features
 
@@ -11,7 +11,7 @@ A modern, feature-rich social platform designed specifically for university stud
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Intuitive Navigation**: Easy-to-use interface with smooth transitions
 
-![Home Page](screenshots/Screenshot%202025-08-16%20at%206.07.06%20PM.png)
+![Home Page](screenshots/thread.png)
 
 ### 📝 **Thread Creation & Management**
 - **Rich Text Posts**: Create engaging content with support for text, images, and videos
@@ -19,7 +19,7 @@ A modern, feature-rich social platform designed specifically for university stud
 - **Real-time Updates**: Instant feedback and live content updates
 - **Thread Filtering**: View all threads or filter by your major
 
-![Thread Creation](screenshots/Screenshot%202025-08-16%20at%206.07.44%20PM.png)
+![Thread Creation](screenshots/replies.png)
 
 ### ❤️ **Interactive Engagement**
 - **Multiple Reaction Types**: Upvote, downvote, and appreciation reactions
@@ -27,7 +27,7 @@ A modern, feature-rich social platform designed specifically for university stud
 - **Real-time Voting**: Instant reaction updates with smooth animations
 - **User Authentication**: Secure login and registration system
 
-![Interactive Features](screenshots/Screenshot%202025-08-16%20at%206.07.59%20PM.png)
+![Interactive Features](screenshots/leaderboard.png)
 
 ### 👤 **User Profiles & Settings**
 - **Personalized Profiles**: Display major, year, and activity statistics
@@ -35,7 +35,9 @@ A modern, feature-rich social platform designed specifically for university stud
 - **Activity Tracking**: View your posts, votes, and community contributions
 - **Major-based Filtering**: Connect with students in your field of study
 
-![User Profile](screenshots/Screenshot%202025-08-16%20at%206.08.13%20PM.png)
+![User Profile](screenshots/profile.png)
+
+![Settings](screenshots/setting.png)
 
 ### 🏆 **Leaderboard & Gamification**
 - **Weekly Rankings**: Compete with fellow students on the leaderboard
