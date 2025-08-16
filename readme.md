@@ -4,13 +4,17 @@ A modern, feature-rich social platform designed specifically for university stud
 
 
 ![MavThread Banner](screenshots/home.png)
+
+
 ## ✨ Features
 
 ![Home Page](screenshots/thread.png)
+
 ### 🏠 **Home & Navigation**
 - **Modern Dark Theme**: Beautiful gradient backgrounds with orange and emerald accents
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Intuitive Navigation**: Easy-to-use interface with smooth transitions
+
 
 ![Thread Creation](screenshots/createThread.png)
 
@@ -19,6 +23,7 @@ A modern, feature-rich social platform designed specifically for university stud
 - **File Upload**: Direct Cloudinary integration for seamless media sharing
 - **Real-time Updates**: Instant feedback and live content updates
 - **Thread Filtering**: View all threads or filter by your major
+
 
 ![Thread Creation](screenshots/replies.png)
 
